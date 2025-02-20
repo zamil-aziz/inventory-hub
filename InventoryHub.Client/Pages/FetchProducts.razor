@@ -1,0 +1,72 @@
+@page "/fetchproducts"
+@using InventoryHub.Client.Models
+@using InventoryHub.Client.Services
+@inject ProductService ProductService
+
+<h3>Product List</h3>
+
+<div class="alert alert-danger" role="alert" style="display: @(errorMessage != null ? "block" : "none")">
+    @errorMessage
+</div>
+
+<div class="card">
+    <div class="card-header">
+        Inventory Products
+    </div>
+    <div class="card-body">
+        @if (products == null)
+        {
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        }
+        else
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var product in products)
+                    {
+                        <tr>
+                            <td>@product.Id</td>
+                            <td>@product.Name</td>
+                            <td>$@product.Price.ToString("F2")</td>
+                            <td>@product.Stock</td>
+                            <td>@product.Category?.Name</td>
+                            <td>@product.Category?.Description</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@code {
+    private Product[]? products;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var productList = await ProductService.GetProductsAsync();
+            products = productList.ToArray();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+    }
+}
